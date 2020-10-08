@@ -36,38 +36,34 @@ blocks:
         - name: Integration tests
           commands:
             - mvn test -Pintegration-testing
-        - name: 'Job #3'
-          commands: []
       agent:
         machine:
           type: e1-standard-2
           os_image: ubuntu1804
     dependencies:
       - Build
-  - name: Performance tests
-    task:
-      env_vars:
-        - name: MAVEN_OPTS
-          value: '-Dmaven.repo.local=.m2'
-      prologue:
-        commands:
-          - checkout
-          - cache restore
-          - 'mvn -q package jmeter:configure -Dmaven.test.skip=true'
-      jobs:
-        - name: Benchmark
-          commands:
-            - java -version
-            - java -jar target/spring-pipeline-demo.jar > /dev/null &
-            - sleep 20
-            - 'mvn -q jmeter:jmeter'
-            - 'mvn jmeter:results'
-    dependencies:
-      - Test
   - name: 'Block #4'
     dependencies:
       - Test
     task:
+      jobs:
+        - name: 'Job #1'
+          commands: []
+        - name: 'Job #2'
+          commands: []
+        - name: 'Job #3'
+          commands: []
+  - name: Deploy
+    dependencies:
+      - 'Block #4'
+    task:
+      env_vars:
+        - name: FOO_1
+          value: BAR_1
+      agent:
+        machine:
+          type: e1-standard-2
+          os_image: ubuntu1804
       jobs:
         - name: 'Job #1'
           commands: []
